@@ -10,15 +10,16 @@ const app = express();
 
 
 // config
-if (process.env.NODE_ENV === 'production') {
-    require('dotenv').config({ path: './.env' });
-    console.log(process.env.MONGO_URI);
+require('dotenv').config({ path: './.env' });
 
-}
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config({ path: './config/config.env' });
-    console.log(process.env.MONGO_URI);
-}
+// if (process.env.NODE_ENV === 'production') {
+//     console.log(process.env.MONGO_URI);
+
+// }
+// if (process.env.NODE_ENV !== 'production') {
+//     require('dotenv').config({ path: './config/config.env' });
+//     console.log(process.env.MONGO_URI);
+// }
 
 app.use(express.json());
 app.use(cookieParser());
