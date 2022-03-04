@@ -23,6 +23,7 @@ const product = require('./routes/productRoute');
 app.use('/api/v1', user);
 app.use('/api/v1', product);
 
+
 // deployment
 __dirname = path.resolve();
 if (process.env.NODE_ENV === 'production') {
