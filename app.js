@@ -8,18 +8,8 @@ var cors = require('cors')
 
 const app = express();
 
-
 // config
 require('dotenv').config({ path: './.env' });
-
-// if (process.env.NODE_ENV === 'production') {
-//     console.log(process.env.MONGO_URI);
-
-// }
-// if (process.env.NODE_ENV !== 'production') {
-//     require('dotenv').config({ path: './config/config.env' });
-//     console.log(process.env.MONGO_URI);
-// }
 
 app.use(express.json());
 app.use(cookieParser());
@@ -43,7 +33,7 @@ if (process.env.NODE_ENV === 'production') {
     });
 } else {
     app.get('/', (req, res) => {
-        res.send('Server is Running! 🚀');
+        res.send('Server is Running! ');
     });
 }
 
