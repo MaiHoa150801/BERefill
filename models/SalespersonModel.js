@@ -1,23 +1,29 @@
 const mongoose = require('mongoose');
 
-const productSchema = new mongoose.Schema({
+const salespersonSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
   },
-  unit_price: {
-    type: Number,
+  phone_number: {
+    type: String,
     required: true,
+    min: 10,
+    max: 12,
   },
-  sale_price: {
-    type: Number,
-    required: true,
-  },
-  measure: {
+  email: {
     type: String,
     required: true,
   },
-  trademark_id: {
+  address: {
+    type: String,
+    required: true,
+  },
+  latitude: {
+    type: Number,
+    required: true,
+  },
+  longitude: {
     type: Number,
     required: true,
   },
@@ -25,19 +31,23 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  list_image: {
-    type: Array,
-    default: [],
-  },
-  type_product_id: {
+  account_id: {
     type: Number,
     required: true,
   },
+  list_product: {
+    type: Array,
+    default: [],
+  },
+  logo: {
+    type: String,
+    required: true,
+  },
 });
-productSchema.method('toJSON', function () {
+salespersonSchema.method('toJSON', function () {
   const { __v, _id, ...object } = this.toObject();
   object.id = _id;
   return object;
 });
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = mongoose.model('Salesperson', salespersonSchema);
