@@ -57,8 +57,8 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
 
 // Create Product ---ADMIN
 exports.createProduct = asyncErrorHandler(async (req, res, next) => {
-  let images = ['ll'];
-  if (req.files.list_image) {
+  let images = [''];
+  if (req.files) {
     const imagePath = path.join(__dirname, '../images/products');
     images = await Promise.all(
       req.files.list_image.map(async (e) => {
@@ -80,7 +80,6 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
 // Update Product ---ADMIN
 exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
-
   if (!product) {
     return next(new ErrorHandler('Product Not Found', 404));
   }
