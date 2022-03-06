@@ -1,4 +1,5 @@
 const express = require('express');
+const { contactLanding } = require('../controllers/contactController');
 const { registerUser, loginUser, logoutUser, getUserDetails, forgotPassword, resetPassword, updatePassword, updateProfile, getAllUsers, getSingleUser, updateUserRole, deleteUser } = require('../controllers/userController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
@@ -7,6 +8,7 @@ const router = express.Router();
 router.route('/register').post(registerUser);
 router.route('/login').post(loginUser);
 router.route('/logout').get(logoutUser);
+router.route('/contact').post(contactLanding);
 
 router.route('/me').get(isAuthenticatedUser, getUserDetails);
 
