@@ -35,10 +35,12 @@ const salespersonSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  list_product: {
-    type: Array,
-    default: [],
-  },
+  list_product: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Product',
+    },
+  ],
   logo: {
     type: String,
     required: true,

@@ -8,8 +8,8 @@ const {
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 
-router.get('/salespersons', isAuthenticatedUser, getAllSalesperson);
-router.get('/salesperson/:account_id', isAuthenticatedUser, getSalesperson);
+router.get('/salespersons', getAllSalesperson);
+router.get('/salesperson/:account_id', getSalesperson);
 router.post(
   '/salespersons',
   isAuthenticatedUser,

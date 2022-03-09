@@ -59,7 +59,7 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
 exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   let images = [''];
   if (req.files) {
-    const imagePath = path.join(__dirname, '../images/products');
+    const imagePath = 'public/images/products';
     images = await Promise.all(
       req.files.list_image.map(async (e) => {
         const fileUpload = new Resize(imagePath, e.name);
