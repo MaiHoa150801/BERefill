@@ -5,7 +5,10 @@ const path = require('path');
 const Resize = require('../root/Resize');
 
 exports.getAllSalesperson = asyncErrorHandler(async (req, res, next) => {
-  const salespersons = await Salesperson.find();
+  const salespersons = await Salesperson.find().populate({
+    model: 'Product',
+    path: 'list_product',
+  });
 
   res.status(200).json({
     success: true,
@@ -16,6 +19,9 @@ exports.getAllSalesperson = asyncErrorHandler(async (req, res, next) => {
 exports.getSalesperson = asyncErrorHandler(async (req, res, next) => {
   const salesperson = await Salesperson.find({
     account_id: req.params.account_id,
+  }).populate({
+    model: 'Product',
+    path: 'list_product',
   });
   res.status(200).json({
     success: true,
