@@ -5,32 +5,6 @@ const ErrorHandler = require('../utils/errorHandler');
 const path = require('path');
 const Resize = require('../root/Resize');
 
-// Get All Products
-exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
-  const resultPerPage = 12;
-  const productsCount = await Product.countDocuments();
-  // console.log(req.query);
-
-  const searchFeature = new SearchFeatures(Product.find(), req.query)
-    .search()
-    .filter();
-
-  let products = await searchFeature.query;
-  let filteredProductsCount = products.length;
-
-  searchFeature.pagination(resultPerPage);
-
-  products = await searchFeature.query.clone();
-
-  res.status(200).json({
-    success: true,
-    products,
-    productsCount,
-    resultPerPage,
-    filteredProductsCount,
-  });
-});
-
 // Get All Products ---Product Sliders
 exports.getProducts = asyncErrorHandler(async (req, res, next) => {
   const products = await Product.find();
@@ -71,7 +45,7 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   req.body.list_image = images;
   const product = await Product.create(req.body);
 
-  res.status(201).json({
+  res.status(200).json({
     success: true,
     product,
   });

@@ -1,34 +1,23 @@
 const mongoose = require('mongoose');
 
-const voucherSchema = new mongoose.Schema({
-  description: {
-    type: String,
-    required: true,
-  },
-  discount: {
-    type: String,
-    required: true,
-  },
-  expiry_date: {
-    type: Date,
-    required: true,
-  },
-  type: {
-    type: String,
-    required: true,
-  },
-  salesperson_id: {
-    type: Number,
-  },
-  quantity: {
+const userVoucherSchema = new mongoose.Schema({
+  account_id: {
     type: Number,
     required: true,
+  },
+  list_voucher_id: {
+    type: Array,
+    default: [],
+  },
+  list_voucher_used: {
+    type: Array,
+    default: [],
   },
 });
-voucherSchema.method('toJSON', function () {
+userVoucherSchema.method('toJSON', function () {
   const { __v, _id, ...object } = this.toObject();
   object.id = _id;
   return object;
 });
 
-module.exports = mongoose.model('Voucher', voucherSchema);
+module.exports = mongoose.model('UserVoucher', userVoucherSchema);

@@ -20,13 +20,18 @@ app.use(cors());
 const user = require('./routes/userRoute');
 const product = require('./routes/productRoute');
 const salesperson = require('./routes/salespersonRoute');
+const voucher = require('./routes/voucherRoute');
+const order = require('./routes/orderRoute');
 app.use('/api/v1', user);
 app.use('/api/v1', product);
 app.use('/api/v1', salesperson);
+app.use('/api/v1', voucher);
+app.use('/api/v1', order);
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   res.send('Server is Running! ');
 });
+
 // deployment
 // __dirname = path.resolve();
 // if (process.env.NODE_ENV === 'production') {
