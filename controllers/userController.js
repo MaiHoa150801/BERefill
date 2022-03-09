@@ -10,26 +10,24 @@ const Resize = require('../root/Resize');
 
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
-  let avatar = '';
-  if (req.files) {
-    const imagePath = 'public/images/avatars';
-    const fileUpload = await new Resize(imagePath, req.files.avatar.name);
-    const fileUrl = await fileUpload.save(req.files.avatar.data);
-    avatar =
-      'https://be-refill-mml5m.ondigitalocean.app/images/avatars/' +
-      req.files.avatar.name;
-  }
+  const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
 
-  const { name, email, gender, password } = req.body;
+  const { name, email, phone, password } = req.body;
 
   const user = await User.create({
     name,
     email,
-    gender,
+    phone,
     password,
-    avatar: avatar,
+    avatar: {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    },
   });
-
   sendToken(user, 201, res);
 });
 
@@ -227,7 +225,7 @@ exports.updateUserRole = asyncErrorHandler(async (req, res, next) => {
   const newUserData = {
     name: req.body.name,
     email: req.body.email,
-    gender: req.body.gender,
+    phone: req.body.phone,
     role: req.body.role,
   };
 
