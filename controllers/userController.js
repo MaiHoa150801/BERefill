@@ -10,24 +10,36 @@ const Resize = require('../root/Resize');
 
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
-  const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-    folder: "avatars",
-    width: 150,
-    crop: "scale",
-  });
+  if (req.body.avatar) {
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
+    const { name, email, phone, password } = req.body;
+
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      avatar: {
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
+      },
+    });
+  }
 
   const { name, email, phone, password } = req.body;
 
-  const user = await User.create({
-    name,
-    email,
-    phone,
-    password,
-    avatar: {
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url,
-    },
-  });
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      
+    });
+
   sendToken(user, 201, res);
 });
 
