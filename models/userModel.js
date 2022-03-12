@@ -11,16 +11,13 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Please Enter Your Email'],
     unique: true,
   },
   phone: {
     type: String,
-    required: [true, 'Please Enter Phone'],
   },
   password: {
     type: String,
-    required: [true, 'Please Enter Your Password'],
     minLength: [8, 'Password should have atleast 8 chars'],
     select: false,
   },
@@ -32,7 +29,7 @@ const userSchema = new mongoose.Schema({
     url: {
       type: String,
       default: '',
-    }
+    },
   },
   role: {
     type: String,
@@ -42,8 +39,18 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  resetPasswordToken: String,
-  resetPasswordExpire: Date,
+  googleId: {
+    type: String,
+  },
+  facebookId: {
+    type: String,
+  },
+  resetPasswordCode: {
+    type: String,
+  },
+  resetPasswordExpire: {
+    type: Date,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -64,18 +71,15 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.methods.getResetPasswordToken = async function () {
+userSchema.methods.getResetPasswordCode = async function () {
   // generate token
-  const resetToken = crypto.randomBytes(20).toString('hex');
+  const code = await Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
 
   // generate hash token and add to db
-  this.resetPasswordToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
-
-  return resetToken;
+  console.log(code);
+  this.resetPasswordCode = code.toString();
+  this.resetPasswordExpire = Date.now() + 120;
+  return this;
 };
 
 module.exports = mongoose.model('User', userSchema);

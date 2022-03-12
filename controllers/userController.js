@@ -2,44 +2,35 @@ const User = require('../models/userModel');
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
 const sendToken = require('../utils/sendToken');
 const ErrorHandler = require('../utils/errorHandler');
-const sendEmail = require('../utils/sendEmail');
-const streamifier = require('streamifier');
+const hbs = require('nodemailer-express-handlebars');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary');
-const Resize = require('../root/Resize');
+const nodemailer = require('nodemailer');
+const path = require('path');
 
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
+  let avatar = {};
+  const { name, email, phone, password } = req.body;
   if (req.body.avatar) {
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-      folder: "avatars",
+      folder: 'avatars',
       width: 150,
-      crop: "scale",
+      crop: 'scale',
     });
-    const { name, email, phone, password } = req.body;
-
-    const user = await User.create({
-      name,
-      email,
-      phone,
-      password,
-      avatar: {
-        public_id: myCloud.public_id,
-        url: myCloud.secure_url,
-      },
-    });
+    avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
   }
 
-  const { name, email, phone, password } = req.body;
-
-    const user = await User.create({
-      name,
-      email,
-      phone,
-      password,
-      
-    });
-
+  const user = await User.create({
+    name,
+    email,
+    phone,
+    password,
+    avatar: avatar,
+  });
   sendToken(user, 201, res);
 });
 
@@ -66,6 +57,42 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
+exports.loginGoogle = asyncErrorHandler(async (req, res, next) => {
+  const { googleId, email, name, avatar } = req.body;
+  const oldUser = await User.findOne({ email: email });
+  if (oldUser) {
+    sendToken(oldUser, 200, res);
+  } else {
+    const user = await new User({
+      googleId: googleId,
+      name: name,
+      email: email,
+      avatar: {
+        url: avatar,
+      },
+    });
+    await user.save();
+    sendToken(user, 200, res);
+  }
+});
+exports.loginFacebook = asyncErrorHandler(async (req, res, next) => {
+  const { facebookId, name, avatar } = req.body;
+  const oldUser = await User.findOne({ facebookId: facebookId });
+  if (oldUser) {
+    sendToken(oldUser, 200, res);
+  } else {
+    const user = await new User({
+      facebookId: facebookId,
+      name: name,
+      avatar: {
+        url: avatar,
+      },
+    });
+    await user.save();
+    sendToken(user, 200, res);
+  }
+});
+
 // Logout User
 exports.logoutUser = asyncErrorHandler(async (req, res, next) => {
   res.cookie('token', null, {
@@ -88,6 +115,11 @@ exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
     user,
   });
 });
+var stringToHTML = function (str) {
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(str, 'text/html');
+  return doc.body;
+};
 
 // Forgot Password
 exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
@@ -96,60 +128,83 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler('User Not Found', 404));
   }
+  await user.getResetPasswordCode();
+  user.save().then((user) => {
+    try {
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'syn282002@gmail.com', // generated ethereal user
+          pass: 'synguyen282001', // generated ethereal password
+        },
+      });
+      const handlebarOptions = {
+        viewEngine: {
+          partialsDir: path.resolve('./views/'),
+          defaultLayout: false,
+        },
+        viewPath: path.resolve('./views/'),
+      };
+      transporter.use('compile', hbs(handlebarOptions));
 
-  const resetToken = await user.getResetPasswordToken();
+      var mailOptions = {
+        from: 'refillapp@gmail.com',
+        to: req.body.email,
+        subject: 'Forgot password email!',
+        template: 'email',
+        context: {
+          code: user.resetPasswordCode,
+        },
+      };
 
-  await user.save({ validateBeforeSave: false });
-
-  const resetPasswordUrl = `https://${req.get(
-    'host'
-  )}/password/reset/${resetToken}`;
-
-  try {
-    await sendEmail({
-      email: user.email,
-      templateId: process.env.SENDGRID_RESET_TEMPLATEID,
-      data: {
-        reset_url: resetPasswordUrl,
-      },
-    });
-
-    res.status(200).json({
-      success: true,
-      message: `Email sent to ${user.email} successfully`,
-    });
-  } catch (error) {
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-
-    await user.save({ validateBeforeSave: false });
-    return next(new ErrorHandler(error.message, 500));
-  }
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+          return next(new ErrorHandler('Không thể gửi được email!', 500));
+        } else {
+          res.status(200).json({
+            success: true,
+            message: `Email sent to ${user.email} successfully`,
+          });
+        }
+      });
+    } catch (error) {}
+  });
 });
 
 // Reset Password
-exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
-  // create hash token
-  const resetPasswordToken = crypto
-    .createHash('sha256')
-    .update(req.params.token)
-    .digest('hex');
-
+exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
+  const { code, email } = req.body;
   const user = await User.findOne({
-    resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() },
+    email: email,
+    resetPasswordCode: code,
+    resetPasswordExpires: { $gt: Date.now() },
   });
+  if (!user)
+    return res
+      .status(401)
+      .json({ message: 'Password reset code is invalid or has expired.' });
+  else
+    res.status(200).json({
+      success: true,
+    });
+});
 
-  if (!user) {
-    return next(new ErrorHandler('Invalid reset password token', 404));
-  }
-
-  user.password = req.body.password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
-
+exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
+  const { password, email } = req.body;
+  const user = await User.findOne({
+    email: email,
+  });
+  user.password = password;
   await user.save();
-  sendToken(user, 200, res);
+  if (!user)
+    return res
+      .status(401)
+      .json({ message: 'Password reset code is invalid or has expired.' });
+  else
+    res.status(200).json({
+      success: true,
+    });
 });
 
 // Update Password
