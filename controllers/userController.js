@@ -175,12 +175,13 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
 // Reset Password
 exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
   const { code, email } = req.body;
+  const date = new Date(Date.now());
   const user = await User.findOne({
     email: email,
     resetPasswordCode: code,
-    resetPasswordExpires: { $gt: Date.now() },
   });
-  if (!user)
+  const compare = date > user.resetPasswordExpire;
+  if (!user || compare == true)
     return res
       .status(401)
       .json({ message: 'Password reset code is invalid or has expired.' });

@@ -74,11 +74,8 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 userSchema.methods.getResetPasswordCode = async function () {
   // generate token
   const code = await Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
-
-  // generate hash token and add to db
-  console.log(code);
   this.resetPasswordCode = code.toString();
-  this.resetPasswordExpire = Date.now() + 120;
+  this.resetPasswordExpire = Date.now() + 2 * 60000;
   return this;
 };
 
