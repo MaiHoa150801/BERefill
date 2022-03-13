@@ -22,11 +22,13 @@ const product = require('./routes/productRoute');
 const salesperson = require('./routes/salespersonRoute');
 const voucher = require('./routes/voucherRoute');
 const order = require('./routes/orderRoute');
+const post = require('./routes/postRoute');
 app.use('/api/v1', user);
 app.use('/api/v1', product);
 app.use('/api/v1', salesperson);
 app.use('/api/v1', voucher);
 app.use('/api/v1', order);
+app.use('/api/v1', post);
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   res.send('Server is Running! ');
