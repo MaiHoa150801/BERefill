@@ -27,7 +27,6 @@ exports.getSalespersonOrder = asyncErrorHandler(async (req, res, next) => {
 exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   const list = await createListOrder(req.body.list_order);
   req.body.list_order_id = list;
-  req.body.account_id = req.user.id;
   const order = await Order.create(req.body);
   res.status(200).json({
     success: true,
