@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  voucher: {
+  voucher_id: {
     type: mongoose.Types.ObjectId,
     ref: 'Voucher',
   },
@@ -25,10 +25,14 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    required: true,
+    default: 'Chờ xác nhận',
   },
   salesperson_id: {
     type: Number,
+    required: true,
+  },
+  date_refill: {
+    type: Date,
     required: true,
   },
 });
