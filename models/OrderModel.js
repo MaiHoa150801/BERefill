@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
     },
   ],
   account_id: {
-    type: Number,
+    type: String,
     required: true,
   },
   voucher_id: {
@@ -28,11 +28,15 @@ const orderSchema = new mongoose.Schema({
     default: 'Chờ xác nhận',
   },
   salesperson_id: {
-    type: Number,
+    type: String,
     required: true,
   },
   date_refill: {
-    type: Date,
+    type: String,
+    required: true,
+  },
+  shipAddress: {
+    type: Object,
     required: true,
   },
 });
