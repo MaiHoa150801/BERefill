@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
 const sendToken = require('../utils/sendToken');
 const ErrorHandler = require('../utils/errorHandler');
+const ValidatePhone = require('../utils/validatePhone');
 const hbs = require('nodemailer-express-handlebars');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary');
@@ -10,6 +11,7 @@ const path = require('path');
 
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
+
   let avatar = {};
   const { name, email, phone, password, address } = req.body;
   if (req.body.avatar) {
@@ -22,6 +24,12 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       public_id: myCloud.public_id,
       url: myCloud.secure_url,
     };
+  }
+
+  const isValidatePhone = await ValidatePhone(phone);
+
+  if (!isValidatePhone) {
+    return next(new ErrorHandler('Invalid Phone', 401));
   }
 
   const user = await User.create({
@@ -40,19 +48,19 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new ErrorHandler('Please Enter Email And Password', 400));
+    return next(new ErrorHandler('Vui lòng nhập email và mật khẩu', 400));
   }
 
   const user = await User.findOne({ email }).select('+password');
 
   if (!user) {
-    return next(new ErrorHandler('Invalid Email or Password', 401));
+    return next(new ErrorHandler('Email và mật khẩu không có giá trị', 401));
   }
 
   const isPasswordMatched = await user.comparePassword(password);
 
   if (!isPasswordMatched) {
-    return next(new ErrorHandler('Invalid Email or Password', 401));
+    return next(new ErrorHandler('Mật khẩu không giống nhau', 401));
   }
 
   sendToken(user, 200, res);
@@ -169,7 +177,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
           });
         }
       });
-    } catch (error) {}
+    } catch (error) { }
   });
 });
 
