@@ -29,7 +29,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
-
 const shippermap = require('./routes/shipperMapRoute');
 const user = require('./routes/userRoute');
 const product = require('./routes/productRoute');
@@ -37,6 +36,8 @@ const salesperson = require('./routes/salespersonRoute');
 const voucher = require('./routes/voucherRoute');
 const order = require('./routes/orderRoute');
 const post = require('./routes/postRoute');
+const ratingProduct = require('./routes/RatingProductRoute');
+const refillpoint = require('./routes/refillPointRoute');
 app.use('/api/v1', shippermap);
 app.use('/api/v1', user);
 app.use('/api/v1', product);
@@ -44,6 +45,8 @@ app.use('/api/v1', salesperson);
 app.use('/api/v1', voucher);
 app.use('/api/v1', order);
 app.use('/api/v1', post);
+app.use('/api/v1', ratingProduct);
+app.use('/api/v1', refillpoint);
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   res.send('Server is Running! ');

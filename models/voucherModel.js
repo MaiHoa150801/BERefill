@@ -24,7 +24,7 @@ const voucherSchema = new mongoose.Schema({
     required: true,
   },
   salesperson_id: {
-    type: Number,
+    type: String,
   },
   quantity: {
     type: Number,

@@ -10,6 +10,10 @@ const listOrderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  evalute: {
+    type: String,
+    default: '',
+  },
 });
 listOrderSchema.method('toJSON', function () {
   const { __v, _id, ...object } = this.toObject();

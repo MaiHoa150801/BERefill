@@ -2,6 +2,7 @@ const UserVoucher = require('../models/userVoucherModel');
 const Voucher = require('../models/voucherModel');
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
 const ErrorHandler = require('../utils/errorHandler');
+const userVoucherModel = require('../models/userVoucherModel');
 exports.getAllVoucher = asyncErrorHandler(async (req, res, next) => {
   const voucher = await Voucher.find();
   res.status(200).json({
@@ -47,6 +48,33 @@ exports.updateVoucher = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+exports.getUserVoucher = asyncErrorHandler(async (req, res, next) => {
+  const voucher = await userVoucherModel.findOne({
+    account_id: req.params.account_id,
+  });
+
+  res.status(201).json({
+    success: true,
+    voucher,
+  });
+});
+
+exports.UserGetVoucher = asyncErrorHandler(async (req, res, next) => {
+  const voucher = await userVoucherModel
+    .findOne({
+      account_id: req.params.account_id,
+    })
+    .populate({
+      model: 'Voucher',
+      path: 'list_voucher_id',
+    });
+
+  res.status(201).json({
+    success: true,
+    voucher,
+  });
+});
+
 exports.userSaveVoucher = asyncErrorHandler(async (req, res, next) => {
   const voucher = await Voucher.findById(req.body.voucher_id);
   if (!voucher) {
@@ -77,7 +105,7 @@ exports.userSaveVoucher = asyncErrorHandler(async (req, res, next) => {
       : [];
     await listVoucher.push(req.body.voucher_id);
 
-    await UserVoucher.findByIdAndUpdate(userVoucher.id, {
+    await UserVoucher.findByIdAndUpdate(userVoucher._id, {
       list_voucher_id: listVoucher,
     });
     await updateQuantityVoucher(req.body.voucher_id, 1);
@@ -99,24 +127,24 @@ const updateQuantityVoucher = async (voucher_id, numberMinus) => {
   });
 };
 
-exports.userUseVoucher = (account_id, voucher_id) => {
-  const voucher = Voucher.findById(voucher_id);
+exports.userUseVoucher = async (account_id, voucher_id) => {
+  const voucher = await Voucher.findById(voucher_id);
   if (new Date() > voucher.expiry_date) {
     return next(new ErrorHandler('Voucher has expired!', 404));
   }
-  const userVoucher = UserVoucher.find({ account_id: account_id });
-  if (userVoucher.list_voucher_id.indexOf(voucher_id)) {
-    return next(new ErrorHandler('You do not have voucher!', 404));
-  }
+  let userVoucher = await UserVoucher.findOne({ account_id: account_id });
   let vouchers = userVoucher.list_voucher_id;
   const index = vouchers.indexOf(voucher_id);
-  vouchers.splice(index, 1);
+  let _voucher = await vouchers.splice(index, 1);
   let voucherUse = userVoucher.list_voucher_used;
   voucherUse.push(voucher_id);
-  userVoucher.update({
-    list_voucher_id: vouchers,
-    list_voucher_used: voucherUse,
-  });
+  await UserVoucher.findOneAndUpdate(
+    { account_id: account_id },
+    {
+      list_voucher_id: vouchers,
+      list_voucher_used: voucherUse,
+    }
+  );
 };
 
 exports.deleteVoucher = asyncErrorHandler(async (req, res, next) => {

@@ -10,16 +10,6 @@ const router = express.Router();
 
 router.get('/salespersons', getAllSalesperson);
 router.get('/salesperson/:account_id', getSalesperson);
-router.post(
-  '/salespersons',
-  isAuthenticatedUser,
-  authorizeRoles('salesperson'),
-  createSalesperson
-);
-router.put(
-  '/salespersons/:id',
-  isAuthenticatedUser,
-  authorizeRoles('salesperson'),
-  updateSalesperson
-);
+router.post('/salespersons', createSalesperson);
+router.put('/salespersons/:id', updateSalesperson);
 module.exports = router;
