@@ -28,8 +28,8 @@ const orderSchema = new mongoose.Schema({
     default: 'Chờ xác nhận',
   },
   salesperson_id: {
-    type: String,
-    required: true,
+    type: mongoose.Types.ObjectId,
+    ref: 'Salesperson',
   },
   date_refill: {
     type: String,
