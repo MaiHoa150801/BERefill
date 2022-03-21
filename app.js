@@ -12,7 +12,6 @@ exports.socketIOMiddleware = (req, res, next) => {
   req.io = io;
   next();
 };
-
 // CORS
 app.use(cors());
 

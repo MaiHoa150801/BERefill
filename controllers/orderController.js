@@ -7,7 +7,7 @@ const { userUseVoucher } = require('./VoucherController');
 
 exports.getUserOrder = asyncErrorHandler(async (req, res, next) => {
   const listOrder = await Order.find({
-    account_id: req.params.account_id,
+    account_id: req.user.id,
     status: req.params.status,
   })
     .populate({
@@ -29,11 +29,46 @@ exports.getUserOrder = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+exports.getOrderByID = asyncErrorHandler(async (req, res, next) => {
+  const order = await Order.findById(req.params.id)
+    .populate({
+      model: 'ListOrder',
+      path: 'list_order_id',
+      populate: { model: 'Product', path: 'product' },
+    })
+    .populate({
+      model: 'Salesperson',
+      path: 'salesperson_id',
+    })
+    .populate({
+      model: 'Voucher',
+      path: 'voucher_id',
+    });
+  res.status(200).json({
+    success: true,
+    order,
+  });
+});
+
 exports.getAllOrderStatus = asyncErrorHandler(async (req, res, next) => {
-  console.log(req.query.status);
+  const now = new Date();
+  const date = now.getDate() >= 10 ? now.getDate() : '0' + now.getDate();
+  let mo = now.getMonth() + 1;
+  const month = mo >= 10 ? mo : '0' + mo;
+  const cur = '' + date + '-' + month + '-' + now.getFullYear();
   const Orders = await Order.find({
     status: req.query.status,
-  });
+    date_refill: cur,
+  })
+    .populate({
+      model: 'ListOrder',
+      path: 'list_order_id',
+      populate: { model: 'Product', path: 'product' },
+    })
+    .populate({
+      model: 'Salesperson',
+      path: 'salesperson_id',
+    });
   res.status(200).json({
     success: true,
     Orders,
@@ -50,9 +85,51 @@ exports.getSalespersonOrder = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+exports.getShipperOrder = asyncErrorHandler(async (req, res, next) => {
+  const listOrder = await Order.find({
+    shipper_id: req.user.id,
+    status: req.query.status,
+  })
+    .populate({
+      model: 'ListOrder',
+      path: 'list_order_id',
+      populate: { model: 'Product', path: 'product' },
+    })
+    .populate({
+      model: 'Salesperson',
+      path: 'salesperson_id',
+    });
+  res.status(200).json({
+    success: true,
+    listOrder,
+  });
+});
+
+exports.updateOrder = asyncErrorHandler(async (req, res, next) => {
+  const find = Order.findOne({
+    id: req.params.id,
+  });
+  if (!find) {
+    return next(new ErrorHandler('Order Not Found', 404));
+  }
+  if (find.shipper_id && req.body.shipper_id) {
+    return next(new ErrorHandler('Orders are being delivered', 401));
+  }
+  const order = await Order.findOneAndUpdate(
+    {
+      id: req.params.id,
+    },
+    req.body
+  );
+  res.status(200).json({
+    success: true,
+    order,
+  });
+});
+
 exports.createOrder = asyncErrorHandler(async (req, res, next) => {
   if (req.body.voucher_id) {
-    await userUseVoucher(req.body.account_id, req.body.voucher_id);
+    await userUseVoucher(req.user.id, req.body.voucher_id);
   }
   const list = await createListOrder(req.body.list_order);
   req.body.list_order_id = list;

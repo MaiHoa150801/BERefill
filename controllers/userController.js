@@ -7,11 +7,30 @@ const crypto = require('crypto');
 const cloudinary = require('cloudinary');
 const nodemailer = require('nodemailer');
 const path = require('path');
-
+const validator = require('email-validator');
+const { phone } = require('phone');
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   let avatar = {};
-  const { name, email, phone, password, address } = req.body;
+  const {
+    name,
+    email,
+    phone: phoneNumber,
+    password,
+    address,
+    cpassword,
+  } = req.body;
+  if (password !== cpassword) {
+    return next(
+      new ErrorHandler('Password and confirm password do not match!', 400)
+    );
+  }
+  if (!validator.validate(email)) {
+    return next(new ErrorHandler('Email invalid!', 400));
+  }
+  if (!phone(phoneNumber).isValid) {
+    return next(new ErrorHandler('Phone invalid!', 400));
+  }
   if (req.body.avatar) {
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
       folder: 'avatars',
@@ -27,7 +46,7 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const user = await User.create({
     name,
     email,
-    phone,
+    phoneNumber,
     password,
     address,
     avatar: avatar,
@@ -42,7 +61,9 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
   if (!email || !password) {
     return next(new ErrorHandler('Please Enter Email And Password', 400));
   }
-
+  if (!validator.validate(email)) {
+    return next(new ErrorHandler('Email invalid!', 400));
+  }
   const user = await User.findOne({ email }).select('+password');
 
   if (!user) {
@@ -116,14 +137,11 @@ exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
     user,
   });
 });
-var stringToHTML = function (str) {
-  var parser = new DOMParser();
-  var doc = parser.parseFromString(str, 'text/html');
-  return doc.body;
-};
-
 // Forgot Password
 exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
+  if (!validator.validate(req.body.email)) {
+    return next(new ErrorHandler('Email invalid!', 400));
+  }
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
@@ -176,6 +194,9 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
 // Reset Password
 exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
   const { code, email } = req.body;
+  if (!validator.validate(email)) {
+    return next(new ErrorHandler('Email invalid!', 400));
+  }
   const date = new Date(Date.now());
   const user = await User.findOne({
     email: email,
@@ -194,6 +215,9 @@ exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
 
 exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
   const { password, email } = req.body;
+  if (!validator.validate(email)) {
+    return next(new ErrorHandler('Email invalid!', 400));
+  }
   const user = await User.findOne({
     email: email,
   });
@@ -226,12 +250,11 @@ exports.updatePassword = asyncErrorHandler(async (req, res, next) => {
 
 // Update User Profile
 exports.updateProfile = asyncErrorHandler(async (req, res, next) => {
-  const newUserData = {
-    name: req.body.name,
-    email: req.body.email,
-  };
+  if (req.body.email && !validator.validate(req.body.email)) {
+    return next(new ErrorHandler('Email invalid!', 400));
+  }
 
-  if (req.body.avatar !== '') {
+  if (req.body.avatar) {
     const user = await User.findById(req.user.id);
 
     const imageId = user.avatar.public_id;
@@ -244,20 +267,17 @@ exports.updateProfile = asyncErrorHandler(async (req, res, next) => {
       crop: 'scale',
     });
 
-    newUserData.avatar = {
+    req.body.avatar = {
       public_id: myCloud.public_id,
       url: myCloud.secure_url,
     };
   }
 
-  await User.findByIdAndUpdate(req.user.id, newUserData, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: true,
-  });
+  const user = await User.findByIdAndUpdate(req.user.id, req.body);
 
   res.status(200).json({
     success: true,
+    user,
   });
 });
 

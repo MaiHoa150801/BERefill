@@ -23,20 +23,9 @@ exports.getShipperMap = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.updateCurrent = asyncErrorHandler(async (req, res, next) => {
-  const shipperMap = await ShipperMapModel.findOneAndUpdate(
-    {
-      account_id: req.body.account_id,
-    },
-    req.body,
-    {
-      new: true,
-      runValidators: true,
-      useFindAndModify: false,
-    }
-  );
-  req.io.emit('data', shipperMap);
+  req.body.id = req.user.id;
+  await req.io.emit(`data/${req.user.id}`, req.body);
   res.status(200).json({
     success: true,
-    shipperMap,
   });
 });
