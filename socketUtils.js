@@ -11,14 +11,10 @@ exports.sio = (server) => {
 
 exports.connection = (io) => {
   io.on('connection', (socket) => {
-    console.log('A user is connected');
-
     socket.on('data', (data) => {
       console.log(data);
     });
 
-    socket.on('disconnect', () => {
-      console.log(`socket ${socket.id} disconnected`);
-    });
+    socket.on('disconnect', () => {});
   });
 };

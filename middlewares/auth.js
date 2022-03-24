@@ -4,24 +4,30 @@ const ErrorHandler = require('../utils/errorHandler');
 const asyncErrorHandler = require('./asyncErrorHandler');
 
 exports.isAuthenticatedUser = asyncErrorHandler(async (req, res, next) => {
-    console.log(req.cookies +"cookies auth");
-    const { token } = req.cookies;
-    console.log(token);
-    if (!token) {
-        return next(new ErrorHandler("Đăng nhập để truy cập", 401))
-    }
+  const {
+    headers: { authorization },
+  } = req;
+  const token = authorization && authorization.split(' ').pop();
+  if (!token) {
+    return next(new ErrorHandler('Đăng nhập để truy cập', 401));
+  }
 
+  try {
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decodedData.id);
     next();
+  } catch (err) {
+    return next(new ErrorHandler('Token invalid!', 401));
+  }
 });
 
 exports.authorizeRoles = (...roles) => {
-    return (req, res, next) => {
-
-        if (!roles.includes(req.user.role)) {
-            return next(new ErrorHandler(`Vai trò: ${req.user.role} không được cho phép truy cập`, 403));
-        }
-        next();
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(`Role: ${req.user.role} is not allowed`, 403)
+      );
     }
-}
+    next();
+  };
+};

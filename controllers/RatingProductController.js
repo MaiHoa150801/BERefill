@@ -5,6 +5,7 @@ const Resize = require('../root/Resize');
 const RatingModel = require('../models/RatingModel');
 const listOrderModel = require('../models/listOrderModel');
 const { updateRefillPoint } = require('./RefillPointController');
+const productModel = require('../models/productModel');
 
 exports.getRatingProduct = asyncErrorHandler(async (req, res, next) => {
   const ratingProduct = await RatingModel.find({
@@ -20,6 +21,10 @@ exports.getRatingProduct = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.ratingProduct = asyncErrorHandler(async (req, res, next) => {
+  const product = productModel.findById(req.params.id);
+  if (!product) {
+    return next(new ErrorHandler('Product Not Found', 404));
+  }
   let images = [''];
   if (req.body.list_image != null) {
     const imagePath = 'public/images/rating';
@@ -28,12 +33,13 @@ exports.ratingProduct = asyncErrorHandler(async (req, res, next) => {
         var buffer = Buffer.from(e.data, 'base64');
         const fileUpload = new Resize(imagePath, e.name);
         const fileUrl = await fileUpload.save(buffer);
-        return fileUrl;
+        return 'https://refillpoint.cleverapps.io/images/rating/' + e.name;
       })
     );
   }
-  await updateRefillPoint(req.body.account_id, 200);
+  await updateRefillPoint(req.user.id, 200);
   req.body.list_image = images;
+  req.body.product_id = req.params.id;
   const ratingProduct = await RatingModel.create(req.body);
 
   const order = await listOrderModel.findByIdAndUpdate(req.body.list_order_id, {

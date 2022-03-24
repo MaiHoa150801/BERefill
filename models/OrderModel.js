@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema({
     type: Object,
     required: true,
   },
+  shipper_id: {
+    type: mongoose.Types.ObjectId,
+    ref: 'User',
+  },
 });
 orderSchema.method('toJSON', function () {
   const { __v, _id, ...object } = this.toObject();
