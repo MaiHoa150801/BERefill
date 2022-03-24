@@ -9,7 +9,7 @@ exports.isAuthenticatedUser = asyncErrorHandler(async (req, res, next) => {
   } = req;
   const token = authorization && authorization.split(' ').pop();
   if (!token) {
-    return next(new ErrorHandler('Please Login to Access', 401));
+    return next(new ErrorHandler('Đăng nhập để truy cập', 401));
   }
 
   try {
