@@ -12,7 +12,6 @@ const validator = require('email-validator');
 const { phone } = require('phone');
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
-
   let avatar = {};
   const {
     name,
@@ -43,12 +42,6 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       public_id: myCloud.public_id,
       url: myCloud.secure_url,
     };
-  }
-
-  const isValidatePhone = await ValidatePhone(phone);
-
-  if (!isValidatePhone) {
-    return next(new ErrorHandler('Invalid Phone', 401));
   }
 
   const user = await User.create({
@@ -195,7 +188,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
           });
         }
       });
-    } catch (error) { }
+    } catch (error) {}
   });
 });
 

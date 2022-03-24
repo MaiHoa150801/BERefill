@@ -1,4 +1,5 @@
 const express = require('express');
+const { socketIOMiddleware } = require('../app');
 const {
   createOrder,
   getUserOrder,
@@ -10,21 +11,23 @@ const {
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 
-router.post('/orders', isAuthenticatedUser, createOrder);
-router.get('/orders/:status', isAuthenticatedUser, getUserOrder);
-router.get('/orders/status', getAllOrderStatus);
-router.put(
-  '/orders/:id',
-  isAuthenticatedUser,
-  authorizeRoles('shipper', 'admin'),
-  updateOrder
-);
 router.get(
-  '/orders/shipper',
+  '/orders/shipper/',
   isAuthenticatedUser,
   authorizeRoles('shipper'),
   getShipperOrder
 );
+router.post('/orders', isAuthenticatedUser, createOrder);
+router.get('/orders/:status', isAuthenticatedUser, getUserOrder);
+router.get('/orders/status/:status', getAllOrderStatus);
+router.put(
+  '/orders/:id',
+  isAuthenticatedUser,
+  authorizeRoles('shipper', 'admin'),
+  socketIOMiddleware,
+  updateOrder
+);
+
 router.get('/order/:id', isAuthenticatedUser, getOrderByID);
 
 module.exports = router;
