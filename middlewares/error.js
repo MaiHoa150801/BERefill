@@ -12,19 +12,19 @@ module.exports = (err, req, res, next) => {
 
     // mongoose duplicate key error
     if (err.code === 11000) {
-        const message = `Duplicate ${Object.keys(err.keyValue)} entered`;
+        const message = ` ${Object.keys(err.keyValue)} đã tồn tại`;
         err = new ErrorHandler(message, 400);
     }
 
     // wrong jwt error
     if (err.code === "JsonWebTokenError") {
-        const message = 'JWT Error';
+        const message = 'Lỗi JWT';
         err = new ErrorHandler(message, 400);
     }
 
     // jwt expire error
     if (err.code === "JsonWebTokenError") {
-        const message = 'JWT is Expired';
+        const message = 'JWT đã hết hạn';
         err = new ErrorHandler(message, 400);
     }
 

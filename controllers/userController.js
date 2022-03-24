@@ -17,22 +17,27 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const {
     name,
     email,
-    phone: phoneNumber,
+    phone,
     password,
     address,
     cpassword,
   } = req.body;
+  if (cpassword == "") {
+    return next(
+      new ErrorHandler('Trường Xác nhận Mật khẩu trống', 400)
+    );
+  }
   if (password !== cpassword) {
     return next(
-      new ErrorHandler('Password and confirm password do not match!', 400)
+      new ErrorHandler('Mật khẩu và xác thực mật khẩu không trùng nhau', 400)
     );
   }
   if (!validator.validate(email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+    return next(new ErrorHandler('Email không có giá trị!', 400));
   }
-  if (!phone(phoneNumber).isValid) {
-    return next(new ErrorHandler('Phone invalid!', 400));
-  }
+  // if (!phone(phoneNumber).isValid) {
+  //   return next(new ErrorHandler('Phone invalid!', 400));
+  // }
   if (req.body.avatar) {
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
       folder: 'avatars',
@@ -48,13 +53,13 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const isValidatePhone = await ValidatePhone(phone);
 
   if (!isValidatePhone) {
-    return next(new ErrorHandler('Invalid Phone', 401));
+    return next(new ErrorHandler('Số điện thoại không có giá trị', 401));
   }
 
   const user = await User.create({
     name,
     email,
-    phoneNumber,
+    phone,
     password,
     address,
     avatar: avatar,
