@@ -137,6 +137,7 @@ exports.updateOrder = asyncErrorHandler(async (req, res, next) => {
   if (find.shipper_id && req.body.shipper_id) {
     return next(new ErrorHandler('Orders are being delivered', 401));
   }
+
   let update = {
     status: req.body.status,
   };
@@ -155,6 +156,7 @@ exports.updateOrder = asyncErrorHandler(async (req, res, next) => {
       message: req.body.status == 'Đã xác nhận' ? 'Có đơn hàng mới' : null,
     });
   }
+
   res.status(200).json({
     success: true,
     order,
