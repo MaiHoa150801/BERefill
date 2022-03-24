@@ -12,7 +12,6 @@ const validator = require('email-validator');
 const { phone } = require('phone');
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
-
   let avatar = {};
   const {
     name,
@@ -22,6 +21,7 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
     address,
     cpassword,
   } = req.body;
+
   if (cpassword == "") {
     return next(
       new ErrorHandler('Trường Xác nhận Mật khẩu trống', 400)
@@ -49,6 +49,7 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       url: myCloud.secure_url,
     };
   }
+
 
   const isValidatePhone = await ValidatePhone(phone);
 
@@ -200,7 +201,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
           });
         }
       });
-    } catch (error) { }
+    } catch (error) {}
   });
 });
 
