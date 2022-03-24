@@ -4,9 +4,9 @@ const ErrorHandler = require('../utils/errorHandler');
 const asyncErrorHandler = require('./asyncErrorHandler');
 
 exports.isAuthenticatedUser = asyncErrorHandler(async (req, res, next) => {
-
+    console.log(req.cookies +"cookies auth");
     const { token } = req.cookies;
-
+    console.log(token);
     if (!token) {
         return next(new ErrorHandler("Đăng nhập để truy cập", 401))
     }

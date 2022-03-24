@@ -8,8 +8,9 @@ const {
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 
-router.get('/salespersons', getAllSalesperson);
+router.get('/shops', getAllSalesperson);
 router.get('/salesperson/:account_id', getSalesperson);
-router.post('/salespersons', createSalesperson);
+// router.post('/salespersons', createSalesperson);
+router.route('/shop/new').post(isAuthenticatedUser, createSalesperson);
 router.put('/salespersons/:id', updateSalesperson);
 module.exports = router;
