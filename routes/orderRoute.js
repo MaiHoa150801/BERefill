@@ -20,6 +20,7 @@ router.get(
 router.post('/orders', isAuthenticatedUser, createOrder);
 router.get('/orders/:status', isAuthenticatedUser, getUserOrder);
 router.get('/orders/status/:status', getAllOrderStatus);
+
 router.put(
   '/orders/:id',
   isAuthenticatedUser,
