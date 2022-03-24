@@ -11,6 +11,6 @@ const router = express.Router();
 router.get('/shops', getAllSalesperson);
 router.get('/salesperson/:account_id', getSalesperson);
 // router.post('/salespersons', createSalesperson);
-router.route('/shop/new').post(isAuthenticatedUser, createSalesperson);
+router.route('/shop/new').post( createSalesperson);
 router.put('/salespersons/:id', updateSalesperson);
 module.exports = router;

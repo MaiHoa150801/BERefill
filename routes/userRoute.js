@@ -15,7 +15,7 @@ const {
   loginGoogle,
   loginFacebook,
   sendCodeResetPass,
-  resetPassword,
+  resetPassword
 } = require('../controllers/userController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 

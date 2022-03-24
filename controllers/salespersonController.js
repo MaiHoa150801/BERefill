@@ -33,22 +33,30 @@ exports.getSalesperson = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.createSalesperson = asyncErrorHandler(async (req, res, next) => {
-  id = User.findById(req.params.id);
-  console.log(id);
-  account_id = req.user.id;
-  console.log(account_id);
-  const file = req.files.logo;
-  console.log(file);
-  const { name, email, phone_number, address, latitude, longitude, description } = req.body;
+  let logo = {};
 
-  const myLogo = await cloudinary.v2.uploader.upload(file.tempFilePath, {
-    folder: "Logo",
-    resource_type: "auto"
-  });
+  const {account_id, name, email, phone_number, address, latitude, longitude, description } = req.body;
 
-  req.body.logo = {
-    public_id: myLogo.public_id,
-    url: myLogo.secure_url
+  if (req.body.role) {
+    console.log(req.body.role);
+    const user = await User.findById(account_id);
+    console.log(user);
+    user.role = "salesperson";
+    await user.save();
+  }
+
+  console.log(req.body);
+
+  if (req.body.logo) {
+    const myLogo = await cloudinary.v2.uploader.upload(req.body.logo, {
+      folder: 'Logo',
+      width: 150,
+      crop: 'scale',
+    });
+    logo = {
+      public_id: myLogo.public_id,
+      url: myLogo.secure_url,
+    };
   }
   
   const isValidatePhone = await ValidatePhone(phone_number);
@@ -56,12 +64,6 @@ exports.createSalesperson = asyncErrorHandler(async (req, res, next) => {
   if (!isValidatePhone) {
     return next(new ErrorHandler(' Số điện thoại không đúng', 401));
   }
-  // if (req.files) {
-  //   const imagePath = path.join(__dirname, '../images/salesperson');
-  //   const fileUpload = new Resize(imagePath, req.files.logo.name);
-  //   const fileUrl = await fileUpload.save(req.files.logo.data);
-  //   req.body.logo = fileUrl;
-  // }
 
   const salespersons = await Salesperson.create({
     name,
@@ -71,7 +73,8 @@ exports.createSalesperson = asyncErrorHandler(async (req, res, next) => {
     latitude,
     longitude,
     description,
-    account_id
+    account_id,
+    logo: logo,
   });
 
   res.status(200).json({
