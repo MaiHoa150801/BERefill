@@ -62,6 +62,7 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
     address,
     avatar: avatar,
   });
+
   sendToken(user, 201, res);
 });
 
@@ -72,22 +73,22 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
   if (!email || !password) {
     return next(new ErrorHandler('Vui lòng nhập email và mật khẩu', 400));
   }
-  if (!validator.validate(email)) {
+  if (validator.validate(email) == false) {
     return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const user = await User.findOne({ email }).select('+password');
 
   if (!user) {
-    return next(new ErrorHandler('Email và mật khẩu không có giá trị', 401));
+    return next(new ErrorHandler('Email không tồn tại', 400));
   }
 
   const isPasswordMatched = await user.comparePassword(password);
 
   if (!isPasswordMatched) {
-    return next(new ErrorHandler('Mật khẩu không giống nhau', 401));
+    return next(new ErrorHandler('Bạn đã nhập mật khẩu sai', 400));
   }
 
-  sendToken(user, 200, res);
+  sendToken(user, 201, res);
 });
 
 exports.loginGoogle = asyncErrorHandler(async (req, res, next) => {
@@ -198,7 +199,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
           });
         }
       });
-    } catch (error) {}
+    } catch (error) { }
   });
 });
 
