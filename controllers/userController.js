@@ -76,7 +76,7 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
     return next(new ErrorHandler('Vui lòng nhập email và mật khẩu', 400));
   }
   if (!validator.validate(email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const user = await User.findOne({ email }).select('+password');
 

@@ -4,6 +4,8 @@ const SearchFeatures = require('../utils/searchFeatures');
 const ErrorHandler = require('../utils/errorHandler');
 const path = require('path');
 const Resize = require('../root/Resize');
+const cloudinary = require('cloudinary');
+const Salesperson = require('../models/SalespersonModel');
 
 // Get All Products ---Product Sliders
 exports.getProducts = asyncErrorHandler(async (req, res, next) => {
@@ -20,7 +22,7 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHandler('Product Not Found', 404));
+    return next(new ErrorHandler('Không tìm thấy sản phẩm', 404));
   }
 
   res.status(200).json({
@@ -29,26 +31,63 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-// Create Product ---ADMIN
+// Create Product ---SALER
 exports.createProduct = asyncErrorHandler(async (req, res, next) => {
-  let images = [''];
-  if (req.files) {
-    const imagePath = 'public/images/products';
-    images = await Promise.all(
-      req.files.list_image.map(async (e) => {
-        const fileUpload = new Resize(imagePath, e.name);
-        const fileUrl = await fileUpload.save(e.data);
-        return fileUrl;
-      })
-    );
+
+  console.log(req.body.user);
+  let list_images = [];
+  if (typeof req.body.list_images === "string") {
+    list_images.push(req.body.list_images);
+  } else {
+    list_images = req.body.list_images;
   }
-  req.body.list_image = images;
+
+  const imagesLink = [];
+
+  for (let i = 0; i < list_images.length; i++) {
+    const result = await cloudinary.v2.uploader.upload(list_images[i], {
+      folder: "products",
+    });
+
+    imagesLink.push({
+      public_id: result.public_id,
+      url: result.secure_url,
+    });
+  }
+
+  const result = await cloudinary.v2.uploader.upload(req.body.logo, {
+    folder: "trademark",
+  });
+
+  const tradeMark = {
+    public_id: result.public_id,
+    url: result.secure_url,
+  };
+
+  req.body.trademark = {
+    name: req.body.tradeMarkName,
+    logo: tradeMark
+  }
+  req.body.list_images = imagesLink;
+
   const product = await Product.create(req.body);
 
-  res.status(200).json({
+  //save to shop
+  const list_product = [];
+  console.log(req.body.user);
+  const user = await User.findById(req.body.user);
+  await Salesperson.find(req.body.user);
+  console.log(user);
+  Salesperson.list_product = list_product.push(product._id);
+  console.log(list_product);
+  await Salesperson.save();
+
+
+  res.status(201).json({
     success: true,
-    product,
+    product
   });
+
 });
 
 // Update Product ---ADMIN
