@@ -21,7 +21,7 @@ exports.contactLanding = asyncErrorHandler(async (req, res, next) => {
             new ErrorHandler('Bạn phải nhập name của bạn', 400)
         );
     }
-    if (!validator.validate(email)) {
+    if (validator.validate(email) == false) {
         return next(new ErrorHandler('Email không có giá trị!', 400));
     }
     if (!message) {
@@ -42,11 +42,5 @@ exports.contactLanding = asyncErrorHandler(async (req, res, next) => {
         success: true,
         message: `Email sent to ${req.body.email} successfully`,
     });
-    // const contact = await contactModel.create({
-    //     name,
-    //     email,
-    //     subject,
-    //     message
-    //   });
-    // sendToken(contact, 201, res);
+
 });

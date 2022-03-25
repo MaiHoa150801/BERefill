@@ -32,12 +32,9 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       new ErrorHandler('Mật khẩu và xác thực mật khẩu không trùng nhau', 400)
     );
   }
-  if (!validator.validate(email)) {
+  if (validator.validate(email) == false) {
     return next(new ErrorHandler('Email không có giá trị!', 400));
   }
-  // if (!phone(phoneNumber).isValid) {
-  //   return next(new ErrorHandler('Phone invalid!', 400));
-  // }
   if (req.body.avatar) {
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
       folder: 'avatars',
