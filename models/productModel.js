@@ -29,7 +29,7 @@ const productSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
-  type_product_id: {
+  type_product: {
     type: Number,
     required: true,
   },
