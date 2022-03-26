@@ -33,7 +33,7 @@ exports.ratingProduct = asyncErrorHandler(async (req, res, next) => {
         var buffer = Buffer.from(e.data, 'base64');
         const fileUpload = new Resize(imagePath, e.name);
         const fileUrl = await fileUpload.save(buffer);
-        return 'https://refillpoint.cleverapps.io/images/rating/' + e.name;
+        return 'http://refillpointapp.cleverapps.io/images/rating/' + e.name;
       })
     );
   }

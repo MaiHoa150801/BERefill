@@ -24,10 +24,22 @@ const PostSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  list_account_like: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
   share: {
     type: Number,
     default: 0,
   },
+  list_account_share: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
   list_comment: [
     {
       type: mongoose.Types.ObjectId,

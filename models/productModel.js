@@ -40,16 +40,16 @@ const productSchema = new mongoose.Schema({
   },
   list_images: [
     {
-        public_id: {
-            type: String,
-            required: true
-        },
-        url: {
-            type: String,
-            required: true
-        }
+      public_id: {
+        type: String,
+        required: true
+      },
+      url: {
+        type: String,
+        required: true
+      }
     }
-],
+  ],
   type_product_id: {
     type: Number,
     required: [true, "Vui lòng nhập id sản phẩm"],

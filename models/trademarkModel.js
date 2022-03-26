@@ -9,10 +9,11 @@ const trademarkSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  type_product_id: {
-    type: Number,
-    required: true,
-  },
+  list_type: [
+    {
+      type: String,
+    },
+  ],
 });
 trademarkSchema.method('toJSON', function () {
   const { __v, _id, ...object } = this.toObject();
