@@ -32,8 +32,8 @@ const salespersonSchema = new mongoose.Schema({
     required: true,
   },
   account_id: {
-    type: Number,
-    required: true,
+    type: mongoose.Types.ObjectId,
+    ref: 'User',
   },
   list_product: [
     {

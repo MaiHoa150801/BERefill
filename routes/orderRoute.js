@@ -7,6 +7,7 @@ const {
   updateOrder,
   getShipperOrder,
   getOrderByID,
+  getSalerOrder,
 } = require('../controllers/orderController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
@@ -16,6 +17,12 @@ router.get(
   isAuthenticatedUser,
   authorizeRoles('shipper'),
   getShipperOrder
+);
+router.get(
+  '/orders/saler/',
+  isAuthenticatedUser,
+  authorizeRoles('salesperson'),
+  getSalerOrder
 );
 router.post('/orders', isAuthenticatedUser, createOrder);
 router.get('/orders/:status', isAuthenticatedUser, getUserOrder);

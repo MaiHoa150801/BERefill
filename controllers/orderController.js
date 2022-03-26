@@ -4,6 +4,7 @@ const ErrorHandler = require('../utils/errorHandler');
 const ListOrder = require('../models/listOrderModel');
 const Order = require('../models/OrderModel');
 const { userUseVoucher } = require('./VoucherController');
+const SalespersonModel = require('../models/SalespersonModel');
 
 exports.getUserOrder = asyncErrorHandler(async (req, res, next) => {
   const listOrder = await Order.find({
@@ -106,6 +107,28 @@ const getOrderStatus = async (status) => {
     });
   return Orders;
 };
+
+exports.getSalerOrder = asyncErrorHandler(async (req, res, next) => {
+  const saler = await SalespersonModel.findOne({
+    account_id: req.user.id,
+  });
+  const listOrder = await Order.find({
+    salesperson_id: saler.id,
+  })
+    .populate({
+      model: 'ListOrder',
+      path: 'list_order_id',
+      populate: { model: 'Product', path: 'product' },
+    })
+    .populate({
+      model: 'Salesperson',
+      path: 'salesperson_id',
+    });
+  res.status(200).json({
+    success: true,
+    listOrder,
+  });
+});
 
 exports.getShipperOrder = asyncErrorHandler(async (req, res, next) => {
   const listOrder = await Order.find({
