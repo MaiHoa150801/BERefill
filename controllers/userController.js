@@ -13,19 +13,10 @@ const { phone } = require('phone');
 // Register User
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   let avatar = {};
-  const {
-    name,
-    email,
-    phone,
-    password,
-    address,
-    cpassword
-  } = req.body;
-  
-  if (cpassword == "") {
-    return next(
-      new ErrorHandler('Trường Xác nhận Mật khẩu trống', 400)
-    );
+  const { name, email, phone, password, address, cpassword } = req.body;
+
+  if (cpassword == '') {
+    return next(new ErrorHandler('Trường Xác nhận Mật khẩu trống', 400));
   }
   if (password !== cpassword) {
     return next(
@@ -52,7 +43,6 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
       url: myCloud.secure_url,
     };
   }
-
 
   const isValidatePhone = await ValidatePhone(phone);
 
@@ -117,6 +107,7 @@ exports.loginGoogle = asyncErrorHandler(async (req, res, next) => {
 });
 exports.loginFacebook = asyncErrorHandler(async (req, res, next) => {
   const { facebookId, name, avatar } = req.body;
+  console.log(name);
   const oldUser = await User.findOne({ facebookId: facebookId });
   if (oldUser) {
     sendToken(oldUser, 200, res);
@@ -205,7 +196,7 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
           });
         }
       });
-    } catch (error) { }
+    } catch (error) {}
   });
 });
 

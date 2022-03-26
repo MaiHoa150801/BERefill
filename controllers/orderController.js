@@ -123,6 +123,14 @@ exports.getSalerOrder = asyncErrorHandler(async (req, res, next) => {
     .populate({
       model: 'Salesperson',
       path: 'salesperson_id',
+    })
+    .populate({
+      model: 'Voucher',
+      path: 'voucher_id',
+    })
+    .populate({
+      model: 'User',
+      path: 'account_id',
     });
   res.status(200).json({
     success: true,

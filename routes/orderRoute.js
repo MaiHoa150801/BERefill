@@ -31,7 +31,7 @@ router.get('/orders/status/:status', getAllOrderStatus);
 router.put(
   '/orders/:id',
   isAuthenticatedUser,
-  authorizeRoles('shipper', 'admin'),
+  authorizeRoles('shipper', 'salesperson', 'admin'),
   socketIOMiddleware,
   updateOrder
 );

@@ -11,14 +11,13 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Mời nhập email người dùng'],
     unique: true,
-    validate: value => {
-        if (!validator.isEmail(value)) {
-            throw new Error({error: 'Định dạng email sai'})
-        }
-    }
-},
+    validate: (value) => {
+      if (!validator.isEmail(value)) {
+        throw new Error({ error: 'Định dạng email sai' });
+      }
+    },
+  },
   phone: {
     type: String,
     unique: [true, 'Mời nhập phone của bạn'],
