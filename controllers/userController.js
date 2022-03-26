@@ -107,7 +107,6 @@ exports.loginGoogle = asyncErrorHandler(async (req, res, next) => {
 });
 exports.loginFacebook = asyncErrorHandler(async (req, res, next) => {
   const { facebookId, name, avatar } = req.body;
-  console.log(name);
   const oldUser = await User.findOne({ facebookId: facebookId });
   if (oldUser) {
     sendToken(oldUser, 200, res);
