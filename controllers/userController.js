@@ -19,9 +19,9 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
     phone,
     password,
     address,
-    cpassword,
+    cpassword
   } = req.body;
-
+  
   if (cpassword == "") {
     return next(
       new ErrorHandler('Trường Xác nhận Mật khẩu trống', 400)
@@ -35,6 +35,12 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   if (validator.validate(email) == false) {
     return next(new ErrorHandler('Email không có giá trị!', 400));
   }
+  const emailuser = await User.findOne({ email });
+
+  if (emailuser) {
+    return next(new ErrorHandler('Email đã từng đăng kí', 400));
+  }
+
   if (req.body.avatar) {
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
       folder: 'avatars',
