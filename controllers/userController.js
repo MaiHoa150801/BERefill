@@ -24,7 +24,7 @@ exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   
   if (cpassword == "") {
     return next(
-      new ErrorHandler('Trường Xác nhận Mật khẩu trống', 400)
+      new ErrorHandler('Trường xác nhận mật khẩu trống', 400)
     );
   }
   if (password !== cpassword) {
@@ -157,13 +157,13 @@ exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
 });
 // Forgot Password
 exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
-  if (!validator.validate(req.body.email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+  if (validator.validate(req.body.email) == false) {
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return next(new ErrorHandler('User Not Found', 404));
+    return next(new ErrorHandler('Email chưa đăng kí tài khoản', 404));
   }
   await user.getResetPasswordCode();
   user.save().then((user) => {
@@ -212,8 +212,8 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
 // Reset Password
 exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
   const { code, email } = req.body;
-  if (!validator.validate(email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+  if (validator.validate(email) == false) {
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const date = new Date(Date.now());
   const user = await User.findOne({
@@ -233,8 +233,8 @@ exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
 
 exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
   const { password, email } = req.body;
-  if (!validator.validate(email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+  if ( validator.validate(email) == false) {
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const user = await User.findOne({
     email: email,
