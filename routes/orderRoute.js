@@ -28,13 +28,7 @@ router.post('/orders', isAuthenticatedUser, createOrder);
 router.get('/orders/:status', isAuthenticatedUser, getUserOrder);
 router.get('/orders/status/:status', getAllOrderStatus);
 
-router.put(
-  '/orders/:id',
-  isAuthenticatedUser,
-  authorizeRoles('shipper', 'salesperson', 'admin'),
-  socketIOMiddleware,
-  updateOrder
-);
+router.put('/orders/:id', isAuthenticatedUser, socketIOMiddleware, updateOrder);
 
 router.get('/order/:id', isAuthenticatedUser, getOrderByID);
 
