@@ -13,15 +13,29 @@ exports.getAllVoucher = asyncErrorHandler(async (req, res, next) => {
 
 exports.getVoucher = asyncErrorHandler(async (req, res, next) => {
   const voucher = await Voucher.find({
-    salesperson_id: req.body.salesperson_id,
-    type: 'Admin voucher',
+    $or: [
+      {
+        salesperson_id: req.params.saler_id,
+      },
+      {
+        type: 'Admin voucher',
+      },
+    ],
   });
   res.status(200).json({
     success: true,
     voucher,
   });
 });
-
+exports.getVoucherSaler = asyncErrorHandler(async (req, res, next) => {
+  const voucher = await Voucher.find({
+    salesperson_id: req.user.id,
+  });
+  res.status(200).json({
+    success: true,
+    voucher,
+  });
+});
 exports.createVoucher = asyncErrorHandler(async (req, res, next) => {
   const voucher = await Voucher.findOne({
     code: req.body.code,
@@ -29,6 +43,10 @@ exports.createVoucher = asyncErrorHandler(async (req, res, next) => {
   if (voucher) {
     return next(new ErrorHandler('Voucher already exists!'));
   }
+  if (req.body.type !== 'Admin voucher') {
+    req.body.salesperson_id = req.user.id;
+  }
+
   const vouchers = await Voucher.create(req.body);
   res.status(201).json({
     success: true,
@@ -37,6 +55,7 @@ exports.createVoucher = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.updateVoucher = asyncErrorHandler(async (req, res, next) => {
+  console.log(req.params.id);
   const voucher = await Voucher.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
