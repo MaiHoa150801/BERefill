@@ -147,14 +147,15 @@ exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
 });
 // Forgot Password
 exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
-  if (!validator.validate(req.body.email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+  if (validator.validate(req.body.email) == false) {
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return next(new ErrorHandler('User Not Found', 404));
+    return next(new ErrorHandler('Email chưa đăng kí', 404));
   }
+
   await user.getResetPasswordCode();
   user.save().then((user) => {
     try {
@@ -202,8 +203,9 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
 // Reset Password
 exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
   const { code, email } = req.body;
-  if (!validator.validate(email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+  console.log(req.body);
+  if (validator.validate(email) == false) {
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const date = new Date(Date.now());
   const user = await User.findOne({
@@ -214,7 +216,7 @@ exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
   if (!user || compare == true)
     return res
       .status(401)
-      .json({ message: 'Password reset code is invalid or has expired.' });
+      .json({ message: 'Mã code để thay đổi mật khẩu không tồn tại hoặc hết hạn.' });
   else
     res.status(200).json({
       success: true,
@@ -223,8 +225,8 @@ exports.sendCodeResetPass = asyncErrorHandler(async (req, res, next) => {
 
 exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
   const { password, email } = req.body;
-  if (!validator.validate(email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+  if (validator.validate(email) == false) {
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
   const user = await User.findOne({
     email: email,
@@ -234,7 +236,7 @@ exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
   if (!user)
     return res
       .status(401)
-      .json({ message: 'Password reset code is invalid or has expired.' });
+      .json({ message: 'Mã code thay đổi password không tồn tại hoặc hết hạn.' });
   else
     res.status(200).json({
       success: true,
@@ -259,16 +261,20 @@ exports.updatePassword = asyncErrorHandler(async (req, res, next) => {
 // Update User Profile
 exports.updateProfile = asyncErrorHandler(async (req, res, next) => {
   if (req.body.email && !validator.validate(req.body.email)) {
-    return next(new ErrorHandler('Email invalid!', 400));
+    return next(new ErrorHandler('Email không đúng định dạng!', 400));
   }
 
   if (req.body.avatar) {
     const user = await User.findById(req.user.id);
 
-    const imageId = user.avatar.public_id;
-
-    await cloudinary.v2.uploader.destroy(imageId);
-
+    if(!user.avatar.public_id ){
+      next();
+    }
+    if(user.avatar.public_id ){
+      const imageId = user.avatar.public_id;
+      await cloudinary.v2.uploader.destroy(imageId);
+    }
+    
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
       folder: 'avatars',
       width: 150,
