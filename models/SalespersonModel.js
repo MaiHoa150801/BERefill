@@ -29,10 +29,10 @@ const salespersonSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  account_id: {
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-  },
+  // account_id: {
+  //   type: mongoose.Types.ObjectId,
+  //   ref: 'User',
+  // },
   account_id: {
     type: mongoose.Types.ObjectId,
     ref: "User",

@@ -37,15 +37,7 @@ exports.createSalesperson = asyncErrorHandler(async (req, res, next) => {
 
   const {account_id, name, email, phone_number, address, latitude, longitude, description } = req.body;
 
-  if (req.body.role) {
-    console.log(req.body.role);
-    const user = await User.findById(account_id);
-    console.log(user);
-    user.role = "salesperson";
-    await user.save();
-  }
-
-  console.log(req.body);
+  // console.log(req.body);
 
   if (req.body.logo) {
     const myLogo = await cloudinary.v2.uploader.upload(req.body.logo, {
@@ -76,6 +68,14 @@ exports.createSalesperson = asyncErrorHandler(async (req, res, next) => {
     account_id,
     logo: logo,
   });
+
+  if (req.body.role) {
+    console.log(req.body.role);
+    const user = await User.findById(account_id);
+    console.log(user);
+    user.role = "salesperson";
+    await user.save();
+  }
 
   res.status(200).json({
     success: true,

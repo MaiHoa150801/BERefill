@@ -33,26 +33,22 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
 
 // Create Product ---SALER
 exports.createProduct = asyncErrorHandler(async (req, res, next) => {
-
-  console.log(req.body.user);
   let list_images = [];
   if (typeof req.body.list_images === "string") {
     list_images.push(req.body.list_images);
   } else {
     list_images = req.body.list_images;
   }
-
   const imagesLink = [];
-
+  console.log(list_images.length);
   for (let i = 0; i < list_images.length; i++) {
-    const result = await cloudinary.v2.uploader.upload(list_images[i], {
-      folder: "products",
-    });
-
-    imagesLink.push({
-      public_id: result.public_id,
-      url: result.secure_url,
-    });
+      const result = await cloudinary.v2.uploader.upload(list_images[i], {
+        folder: "products",
+      });
+      await imagesLink.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
   }
 
   const result = await cloudinary.v2.uploader.upload(req.body.logo, {
@@ -70,18 +66,15 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   }
   req.body.list_images = imagesLink;
 
+  console.log(req.user.id);
   const product = await Product.create(req.body);
-
-  //save to shop
-  const list_product = [];
-  console.log(req.body.user);
-  const user = await User.findById(req.body.user);
-  await Salesperson.find(req.body.user);
-  console.log(user);
-  Salesperson.list_product = list_product.push(product._id);
-  console.log(list_product);
-  await Salesperson.save();
-
+  const saler = await Salesperson.findOne(
+    {
+      account_id: req.user.id
+    }
+  );
+  saler.list_product.push(product._id)
+  await saler.save();
 
   res.status(201).json({
     success: true,
