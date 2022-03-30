@@ -91,7 +91,9 @@ exports.createPost = asyncErrorHandler(async (req, res, next) => {
         var buffer = Buffer.from(e.data, 'base64');
         const fileUpload = new Resize(imagePath, e.name);
         const fileUrl = await fileUpload.save(buffer);
-        return 'http://refillpointapp.cleverapps.io/images/post/' + e.name;
+        return (
+          'https://be-refill-x8j5d.ondigitalocean.app/images/post/' + e.name
+        );
       })
     );
   }
@@ -167,7 +169,9 @@ exports.updatePost = asyncErrorHandler(async (req, res, next) => {
           var buffer = Buffer.from(e.data, 'base64');
           const fileUpload = new Resize(imagePath, e.name);
           const fileUrl = await fileUpload.save(buffer);
-          return 'http://refillpointapp.cleverapps.io/images/post/' + e.name;
+          return (
+            'https://be-refill-x8j5d.ondigitalocean.app/images/post/' + e.name
+          );
         }
         return e.uri;
       })
