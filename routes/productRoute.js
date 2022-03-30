@@ -10,6 +10,7 @@ const {
   createProduct,
   getAdminProducts,
   getProducts,
+  getSalerProducts,
 } = require('../controllers/productController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
@@ -17,13 +18,17 @@ const router = express.Router();
 
 router.route('/products/all').get(getProducts);
 
-router.route('/admin/product/new').post(isAuthenticatedUser, authorizeRoles('salesperson'), createProduct);
+router
+  .route('/admin/product/new')
+  .post(isAuthenticatedUser, authorizeRoles('salesperson'), createProduct);
 
 router
   .route('/saler/product/:id')
   .put(isAuthenticatedUser, authorizeRoles('salesperson'), updateProduct)
   .delete(isAuthenticatedUser, authorizeRoles('salesperson'), deleteProduct);
-
+router
+  .route('/saler/product')
+  .get(isAuthenticatedUser, authorizeRoles('salesperson'), getSalerProducts);
 router.route('/product/:id').get(getProductDetails);
 
 router.route('/review').put(isAuthenticatedUser, createProductReview);

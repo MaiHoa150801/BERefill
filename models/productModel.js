@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Vui lòng nhập tên sản phẩm"],
-    trim: true
+    required: [true, 'Vui lòng nhập tên sản phẩm'],
+    trim: true,
   },
   unit_price: {
     type: Number,
-    required: [true, "Vui lòng nhập giá trị sản phẩm"],
+    required: [true, 'Vui lòng nhập giá trị sản phẩm'],
   },
   sale_price: {
     type: Number,
@@ -16,12 +16,12 @@ const productSchema = new mongoose.Schema({
   },
   measure: {
     type: String,
-    required: [true, "Vui lòng nhập đo lường sản phẩm"],
+    required: [true, 'Vui lòng nhập đo lường sản phẩm'],
   },
   trademark: {
     name: {
       type: String,
-      required: [true, "Vui lòng nhập hãng sản phẩm"]
+      required: [true, 'Vui lòng nhập hãng sản phẩm'],
     },
     logo: {
       public_id: {
@@ -31,38 +31,32 @@ const productSchema = new mongoose.Schema({
       url: {
         type: String,
         required: true,
-      }
-    }
+      },
+    },
   },
   description: {
     type: String,
-    required: [true, "Vui lòng nhập mô tả sản phẩm"]
+    required: [true, 'Vui lòng nhập mô tả sản phẩm'],
   },
-  list_images: [
+  list_image: [
     {
-      public_id: {
-        type: String,
-        required: true
-      },
-      url: {
-        type: String,
-        required: true
-      }
-    }
+      type: String,
+      required: true,
+    },
   ],
   type_product_id: {
     type: Number,
-    required: [true, "Vui lòng nhập id sản phẩm"],
+    required: [true, 'Vui lòng nhập id sản phẩm'],
   },
   user: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
-    required: true
+    ref: 'User',
+    required: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 productSchema.method('toJSON', function () {
   const { __v, _id, ...object } = this.toObject();
