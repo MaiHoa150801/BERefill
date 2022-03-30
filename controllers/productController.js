@@ -6,6 +6,7 @@ const path = require('path');
 const Resize = require('../root/Resize');
 const cloudinary = require('cloudinary');
 const Salesperson = require('../models/SalespersonModel');
+const SalespersonModel = require('../models/SalespersonModel');
 
 // Get All Products ---Product Sliders
 exports.getProducts = asyncErrorHandler(async (req, res, next) => {
@@ -16,7 +17,19 @@ exports.getProducts = asyncErrorHandler(async (req, res, next) => {
     products,
   });
 });
-
+exports.getSalerProducts = asyncErrorHandler(async (req, res, next) => {
+  const saler = await SalespersonModel.findOne({
+    account_id: req.user.id,
+  }).populate({
+    model: 'Product',
+    path: 'list_product',
+  });
+  const products = saler.list_product;
+  res.status(200).json({
+    success: true,
+    products,
+  });
+});
 // Get Product Details
 exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
@@ -40,15 +53,11 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
     list_images = req.body.list_images;
   }
   const imagesLink = [];
-  console.log(list_images.length);
   for (let i = 0; i < list_images.length; i++) {
     const result = await cloudinary.v2.uploader.upload(list_images[i], {
       folder: 'products',
     });
-    await imagesLink.push({
-      public_id: result.public_id,
-      url: result.secure_url,
-    });
+    await imagesLink.push(result.secure_url);
   }
 
   const result = await cloudinary.v2.uploader.upload(req.body.logo, {
@@ -71,7 +80,7 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   const saler = await Salesperson.findOne({
     account_id: req.user.id,
   });
-  saler.list_product.push(product._id);
+  saler.list_product.push(product.id);
   await saler.save();
 
   res.status(201).json({

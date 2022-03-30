@@ -16,6 +16,7 @@ const {
   loginFacebook,
   sendCodeResetPass,
   resetPassword,
+  registerShipper
 } = require('../controllers/userController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
@@ -41,6 +42,9 @@ router.route('/me/update').put(isAuthenticatedUser, updateProfile);
 router
   .route('/admin/users')
   .get(isAuthenticatedUser, authorizeRoles('admin'), getAllUsers);
+router
+  .route('/admin/shipper/register')
+  .post(isAuthenticatedUser, authorizeRoles('admin'), registerShipper);
 
 router
   .route('/admin/user/:id')

@@ -300,7 +300,6 @@ exports.updateProfile = asyncErrorHandler(async (req, res, next) => {
 // Get All Users --ADMIN
 exports.getAllUsers = asyncErrorHandler(async (req, res, next) => {
   const users = await User.find();
-
   res.status(200).json({
     success: true,
     users,
@@ -322,6 +321,60 @@ exports.getSingleUser = asyncErrorHandler(async (req, res, next) => {
     user,
   });
 });
+
+// Register User
+exports.registerShipper = asyncErrorHandler(async (req, res, next) => {
+  let avatar = {};
+  const { name, email, phone, password, address, cpassword } = req.body;
+
+  if (cpassword == '') {
+    return next(new ErrorHandler('Trường Xác nhận Mật khẩu trống', 400));
+  }
+  if (password !== cpassword) {
+    return next(
+      new ErrorHandler('Mật khẩu và xác thực mật khẩu không trùng nhau', 400)
+    );
+  }
+  if (validator.validate(email) == false) {
+    return next(new ErrorHandler('Email không có giá trị!', 400));
+  }
+  const emailuser = await User.findOne({ email });
+
+  if (emailuser) {
+    return next(new ErrorHandler('Email đã từng đăng kí', 400));
+  }
+
+  if (req.body.avatar) {
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: 'avatars',
+      width: 150,
+      crop: 'scale',
+    });
+    avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+  }
+
+  const isValidatePhone = await ValidatePhone(phone);
+
+  if (!isValidatePhone) {
+    return next(new ErrorHandler('Số điện thoại không có giá trị', 401));
+  }
+
+  const shipper = await User.create({
+    name,
+    email,
+    phone,
+    password,
+    address,
+    avatar: avatar,
+    role: "shipper"
+  });
+
+  sendToken(shipper, 201, res);
+});
+
 
 // Update User Role --ADMIN
 exports.updateUserRole = asyncErrorHandler(async (req, res, next) => {
