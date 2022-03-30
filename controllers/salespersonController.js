@@ -6,6 +6,7 @@ const path = require('path');
 const Resize = require('../root/Resize');
 const cloudinary = require('cloudinary');
 const ValidatePhone = require('../utils/validatePhone');
+const validator = require('email-validator');
 
 exports.getAllSalesperson = asyncErrorHandler(async (req, res, next) => {
   const salespersons = await Salesperson.find().populate({
@@ -55,6 +56,22 @@ exports.createSalesperson = asyncErrorHandler(async (req, res, next) => {
 
   if (!isValidatePhone) {
     return next(new ErrorHandler(' Số điện thoại không đúng', 401));
+  }
+
+  const emailuser = await Salesperson.findOne({ email });
+  console.log(emailuser);
+  if (emailuser) {
+    return next(new ErrorHandler('Email đã từng đăng kí', 400));
+  }
+
+  const account = await Salesperson.findOne({ account_id });
+  console.log(account);
+  if (account) {
+    return next(new ErrorHandler('Tài khoản đã từng đăng kí', 400));
+  }
+
+  if (validator.validate(email) == false) {
+    return next(new ErrorHandler('Email không có giá trị!', 400));
   }
 
   const salespersons = await Salesperson.create({
